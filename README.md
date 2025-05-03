@@ -21,19 +21,28 @@ Campus Book is not just a software its an ecosystem
 git clone https://github.com/bitsofmandal-com/campusbook.git
 ```
 
-1. Check yarn version (you need yarn@4.5.0). If your yarn version is yarn@1.X.X the run the below commands
+2. Check yarn version (you need yarn@4.5.0). If your yarn version is yarn@1.X.X the run the below commands
 
 ```
 corepack enable
 corepack prepare yarn@4.5.0 --activate
 ```
-1. Install Dependencies
+3. Install Dependencies
 
 ```
 yarn install
 ```
 
-1. Run locally
+4. Install dependencies of Backend
+
+```
+cd backend
+go mod tidy
+docker-compose up -d
+air server --port 8080
+```
+
+5. Run locally
 
 ```
 yarn dev
