@@ -1,8 +1,7 @@
 {
-  "name": "aitplacements",
-  "version": "4.0.0",
-  "private": true,
-  "license": "UNLICENSED",
+  "name": "campusbook",
+  "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -76,5 +75,6 @@
     "typescript": "^5.8.2",
     "vercel": "^41.4.1",
     "wrangler": "^3.114.3"
-  }
+  },
+  "packageManager": "yarn@4.5.0"
 }
