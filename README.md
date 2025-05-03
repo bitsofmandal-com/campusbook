@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project Campus Book
+A Modern Facebook alternative for Schools and Colleges. Connect with your students without the social app distractions
 
-## Getting Started
+#### Ignite Your Passion. Reach the World
+Campus Book empowers educators to build thriving online classrooms, discussions, connecting you with students across campus
 
-First, run the development server:
+#### Overwhelmed by the Admin work?
+The logistics of running a class online can dim that flame. Campus Book was born from the belief that every teacher and student deserves a dedicated platform .
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+We've built a simple, powerful platform that breaks down the barriers of traditional classrooms, empowering educators to connect with students anywhere, anytime. Unlock your potential to reach eager minds across the globe.
+
+> Focus on what you do best: inspiring the next generation. Campus Book handles the rest.
+
+And there is more to come?
+Campus Book is not just a software its an ecosystem
+
+## Local Setup
+1. Clone the repo
+
+```
+git clone https://github.com/bitsofmandal-com/campusbook.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Check yarn version (you need yarn@4.5.0). If your yarn version is yarn@1.X.X the run the below commands
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+corepack enable
+corepack prepare yarn@4.5.0 --activate
+```
+1. Install Dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+yarn install
+```
 
-## Learn More
+1. Run locally
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+yarn dev
+```
