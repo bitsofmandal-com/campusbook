@@ -2,7 +2,6 @@ package post
 
 import (
 	"campusbook-be/internal/repository"
-	"fmt"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/net/context"
@@ -39,14 +38,16 @@ func (pr *postServiceSqlc) CreatePost(ctx context.Context, args *repository.Crea
 
 func (pr *postServiceSqlc) GetAllPosts(ctx context.Context) ([]*repository.ListAllPostsRow, error) {
 	// Get the user by ID from the schema
-	post, err := pr.postRepository.ListAllPosts(ctx)
-	fmt.Println(post, err)
-
+	posts, err := pr.postRepository.ListAllPosts(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return post, nil
+	if len(posts) == 0 {
+		posts = []*repository.ListAllPostsRow{}
+	}
+
+	return posts, nil
 }
 
 func (u *postServiceSqlc) GetPostById(ctx context.Context, postID pgtype.UUID) (*repository.Post, error) {

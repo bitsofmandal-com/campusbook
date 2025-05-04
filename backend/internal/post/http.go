@@ -22,7 +22,7 @@ type postHandler struct {
 	postService PostService
 }
 
-func NewUserHandler(postService PostService) PostHandler {
+func NewPostHandler(postService PostService) PostHandler {
 	return &postHandler{postService: postService}
 }
 
@@ -60,7 +60,7 @@ func (h *postHandler) GetPostById(c *gin.Context) {
 
   parsedUUID, err := uuid.Parse(postID)
   if err != nil {
-    errorResponseData := utils.ApiResponse(http.StatusBadRequest, "Invalid Post ID format", nil)
+    errorResponseData := utils.ApiResponse(http.StatusBadRequest, "Invalid post ID format", nil)
     c.JSON(http.StatusBadRequest, errorResponseData)
     return
   }
@@ -86,7 +86,7 @@ func (h *postHandler) GetAllPosts(c *gin.Context) {
 	// Call the GetUserByID method from the use case layer
 	posts, err := h.postService.GetAllPosts(c.Request.Context())
 	if err != nil {
-    errorResponseData := utils.ApiResponse(http.StatusInternalServerError, "Unable to Get All Posts", nil)
+    errorResponseData := utils.ApiResponse(http.StatusInternalServerError, "Unable to get all posts", nil)
 		c.JSON(http.StatusNotFound, errorResponseData)
 		return
 	}
@@ -97,9 +97,57 @@ func (h *postHandler) GetAllPosts(c *gin.Context) {
 }
 
 func (h *postHandler) UpdatePost(c *gin.Context) {
-  c.JSON(http.StatusNotImplemented, gin.H{"message": "UpdatePost not implemented"})
+	var req *repository.UpdatePostParams
+	if err := c.ShouldBindJSON(&req); err != nil {
+		errorResponseData := utils.ApiResponse(http.StatusOK, "Invalid request data", nil)
+		c.JSON(http.StatusBadRequest, errorResponseData)
+		return
+	}
+
+	
+
+	// Call the GetUserByID method from the use case layer
+	post, err := h.postService.UpdatePost(c.Request.Context(), req)
+	if err != nil {
+    errorResponseData := utils.ApiResponse(http.StatusInternalServerError, "Unable to update the post", nil)
+		c.JSON(http.StatusNotFound, errorResponseData)
+		return
+	}
+  successResponseData := utils.ApiResponse(http.StatusOK, "Posts updated successfully", post)
+
+	// Respond with the user data in JSON format
+	c.JSON(http.StatusOK, successResponseData)
 }
 
 func (h *postHandler) DeletePostById(c *gin.Context) {
-  c.JSON(http.StatusNotImplemented, gin.H{"message": "DeletePostById not implemented"})
+	// Retrieve the userID from the path parameters
+	postID := c.Param("postID")
+	if postID == "" {
+		errorResponseData := utils.ApiResponse(http.StatusBadRequest, "Post ID is required", nil)
+		c.JSON(http.StatusBadRequest, errorResponseData)
+		return
+	}
+
+	parsedUUID, err := uuid.Parse(postID)
+	if err != nil {
+		errorResponseData := utils.ApiResponse(http.StatusBadRequest, "Invalid post ID format", nil)
+		c.JSON(http.StatusBadRequest, errorResponseData)
+		return
+	}
+
+	pgUUID := pgtype.UUID{
+		Bytes: parsedUUID,
+		Valid: true,
+	}
+	// Call the GetUserByID method from the use case layer
+	message, err := h.postService.DeletePostById(c.Request.Context(), pgUUID)
+	if err != nil {
+		errorResponseData := utils.ApiResponse(http.StatusInternalServerError, "Unable to delete the post", nil)
+		c.JSON(http.StatusNotFound, errorResponseData)
+		return
+	}
+	successResponseData := utils.ApiResponse(http.StatusOK, message, nil)
+
+	// Respond with the user data in JSON format
+	c.JSON(http.StatusOK, successResponseData)
 }

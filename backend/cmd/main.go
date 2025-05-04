@@ -2,6 +2,7 @@ package main
 
 import (
 	"campusbook-be/internal/general"
+	"campusbook-be/internal/post"
 	"campusbook-be/pkg/database"
 	"context"
 	"flag"
@@ -17,6 +18,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	_ "github.com/joho/godotenv/autoload"
+
+	"campusbook-be/internal/repository"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -66,21 +69,24 @@ func main() {
 
 func registerRoutes(dbInst database.Database, db *pgx.Conn) *gin.Engine {
 	// Declare Router
-	// queries := repository.New(db)
+	queries := repository.New(db)
 
 	// declare generic handlers
 	generalHandlers := general.NewGeneralHandler(dbInst)
 	// declare user handlers
-	// userService := user.NewUserService(queries)
-	// userHandlers := user.NewUserHandler(userService)
+	postService := post.NewPostService(queries)
+	postHandlers := post.NewPostHandler(postService)
 
 	router := gin.Default()
-	// // generic routes
+	// generic routes
 	router.GET("/health", generalHandlers.HealthCheck)
-	// // user routes
-	// userRouter := router.Group("/user")
-	// userRouter.POST("/", userHandlers.RegisterUser)
-	// userRouter.GET("/", userHandlers.GetAllUsers)
+	// post routes
+	postRouter := router.Group("/post")
+	postRouter.POST("/", postHandlers.CreatePost)
+	postRouter.GET("/", postHandlers.GetAllPosts)
+	postRouter.GET("/:id", postHandlers.GetPostById)
+	postRouter.PUT("/:id", postHandlers.UpdatePost)
+	postRouter.DELETE("/:id", postHandlers.DeletePostById)
 
 	return router
 }
@@ -121,7 +127,7 @@ func migrateDatabase(username, password, host, databaseName, schema string, dbpo
 		username, password, host, dbport, databaseName, schema)
 
 	// Create a new migrate instance
-	m, err := migrate.New("file://pkg/schema", connStr)
+	m, err := migrate.New("file://migrations", connStr)
 	if err != nil {
 		log.Fatalf("failed to create migrate instance: %v", err)
 	}

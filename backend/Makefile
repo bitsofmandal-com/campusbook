@@ -38,7 +38,7 @@ clean:
 # Live Reload
 watch:
 	@if command -v air > /dev/null; then \
-            air; \
+            air server --port 8080; \
             echo "Watching...";\
         else \
             read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
@@ -72,4 +72,12 @@ sqlcgen:
                 exit 1; \
             fi; \
         fi
-.PHONY: all build run clean watch docker-run docker-down migrate
+
+createmigration:
+	@echo "Creating migration..."
+	@timestamp=$$(date +%s); \
+	random=$$(openssl rand -hex 3); \
+	read -p "Enter migration name: " name; \
+	migrate create -ext sql -dir migrations -seq "$${timestamp}_$${random}_$${name}"
+
+.PHONY: all build run clean watch docker-run docker-down migrate createmigration
