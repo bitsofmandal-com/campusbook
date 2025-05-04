@@ -28,7 +28,7 @@ type CreatePostParams struct {
 	Files   []string `db:"files" json:"files"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (*Post, error) {
+func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (Post, error) {
 	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Content, arg.Files)
 	var i Post
 	err := row.Scan(
@@ -39,7 +39,7 @@ func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (*Post,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
-	return &i, err
+	return i, err
 }
 
 const deletePostById = `-- name: DeletePostById :exec
@@ -57,7 +57,7 @@ SELECT id, title, content, files, created_at, updated_at FROM posts
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetPostById(ctx context.Context, id pgtype.UUID) (*Post, error) {
+func (q *Queries) GetPostById(ctx context.Context, id pgtype.UUID) (Post, error) {
 	row := q.db.QueryRow(ctx, getPostById, id)
 	var i Post
 	err := row.Scan(
@@ -68,7 +68,7 @@ func (q *Queries) GetPostById(ctx context.Context, id pgtype.UUID) (*Post, error
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
-	return &i, err
+	return i, err
 }
 
 const listAllPosts = `-- name: ListAllPosts :many
@@ -82,19 +82,19 @@ type ListAllPostsRow struct {
 	Files []string    `db:"files" json:"files"`
 }
 
-func (q *Queries) ListAllPosts(ctx context.Context) ([]*ListAllPostsRow, error) {
+func (q *Queries) ListAllPosts(ctx context.Context) ([]ListAllPostsRow, error) {
 	rows, err := q.db.Query(ctx, listAllPosts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*ListAllPostsRow
+	var items []ListAllPostsRow
 	for rows.Next() {
 		var i ListAllPostsRow
 		if err := rows.Scan(&i.ID, &i.Title, &i.Files); err != nil {
 			return nil, err
 		}
-		items = append(items, &i)
+		items = append(items, i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -106,23 +106,26 @@ const updatePost = `-- name: UpdatePost :one
 UPDATE posts
 set title = $2,
     content = $3,
-    files = $4
+    files = $4,
+    updated_at = $5
 WHERE id = $1 RETURNING id, title, content, files, created_at, updated_at
 `
 
 type UpdatePostParams struct {
-	ID      pgtype.UUID `db:"id" json:"id"`
-	Title   string      `db:"title" json:"title"`
-	Content *string     `db:"content" json:"content"`
-	Files   []string    `db:"files" json:"files"`
+	ID        pgtype.UUID        `db:"id" json:"id"`
+	Title     string             `db:"title" json:"title"`
+	Content   *string            `db:"content" json:"content"`
+	Files     []string           `db:"files" json:"files"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
 }
 
-func (q *Queries) UpdatePost(ctx context.Context, arg *UpdatePostParams) (*Post, error) {
+func (q *Queries) UpdatePost(ctx context.Context, arg *UpdatePostParams) (Post, error) {
 	row := q.db.QueryRow(ctx, updatePost,
 		arg.ID,
 		arg.Title,
 		arg.Content,
 		arg.Files,
+		arg.UpdatedAt,
 	)
 	var i Post
 	err := row.Scan(
@@ -133,5 +136,5 @@ func (q *Queries) UpdatePost(ctx context.Context, arg *UpdatePostParams) (*Post,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
-	return &i, err
+	return i, err
 }

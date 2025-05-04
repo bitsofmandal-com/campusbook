@@ -85,7 +85,7 @@ func registerRoutes(dbInst database.Database, db *pgx.Conn) *gin.Engine {
 	postRouter.POST("/", postHandlers.CreatePost)
 	postRouter.GET("/", postHandlers.GetAllPosts)
 	postRouter.GET("/:id", postHandlers.GetPostById)
-	postRouter.PUT("/:id", postHandlers.UpdatePost)
+	postRouter.PUT("/", postHandlers.UpdatePost)
 	postRouter.DELETE("/:id", postHandlers.DeletePostById)
 
 	return router

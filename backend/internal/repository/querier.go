@@ -11,11 +11,11 @@ import (
 )
 
 type Querier interface {
-	CreatePost(ctx context.Context, arg *CreatePostParams) (*Post, error)
+	CreatePost(ctx context.Context, arg *CreatePostParams) (Post, error)
 	DeletePostById(ctx context.Context, id pgtype.UUID) error
-	GetPostById(ctx context.Context, id pgtype.UUID) (*Post, error)
-	ListAllPosts(ctx context.Context) ([]*ListAllPostsRow, error)
-	UpdatePost(ctx context.Context, arg *UpdatePostParams) (*Post, error)
+	GetPostById(ctx context.Context, id pgtype.UUID) (Post, error)
+	ListAllPosts(ctx context.Context) ([]ListAllPostsRow, error)
+	UpdatePost(ctx context.Context, arg *UpdatePostParams) (Post, error)
 }
 
 var _ Querier = (*Queries)(nil)

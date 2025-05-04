@@ -51,7 +51,7 @@ func (h *postHandler) CreatePost(c *gin.Context) {
 // GetUserByID handles HTTP requests to retrieve a user by their ID.
 func (h *postHandler) GetPostById(c *gin.Context) {
 	// Retrieve the userID from the path parameters
-	postID := c.Param("postID")
+	postID := c.Param("id")
 	if postID == "" {
     errorResponseData := utils.ApiResponse(http.StatusBadRequest, "Post ID is required", nil)
 		c.JSON(http.StatusBadRequest, errorResponseData)
@@ -103,9 +103,6 @@ func (h *postHandler) UpdatePost(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResponseData)
 		return
 	}
-
-	
-
 	// Call the GetUserByID method from the use case layer
 	post, err := h.postService.UpdatePost(c.Request.Context(), req)
 	if err != nil {
@@ -121,7 +118,7 @@ func (h *postHandler) UpdatePost(c *gin.Context) {
 
 func (h *postHandler) DeletePostById(c *gin.Context) {
 	// Retrieve the userID from the path parameters
-	postID := c.Param("postID")
+	postID := c.Param("id")
 	if postID == "" {
 		errorResponseData := utils.ApiResponse(http.StatusBadRequest, "Post ID is required", nil)
 		c.JSON(http.StatusBadRequest, errorResponseData)
@@ -147,7 +144,6 @@ func (h *postHandler) DeletePostById(c *gin.Context) {
 		return
 	}
 	successResponseData := utils.ApiResponse(http.StatusOK, message, nil)
-
 	// Respond with the user data in JSON format
 	c.JSON(http.StatusOK, successResponseData)
 }

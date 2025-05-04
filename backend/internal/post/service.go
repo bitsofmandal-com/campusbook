@@ -2,6 +2,7 @@ package post
 
 import (
 	"campusbook-be/internal/repository"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/net/context"
@@ -9,7 +10,7 @@ import (
 
 type PostService interface {
 	CreatePost(ctx context.Context, args *repository.CreatePostParams) (*repository.Post, error)
-	GetAllPosts(ctx context.Context) ([]*repository.ListAllPostsRow, error)
+	GetAllPosts(ctx context.Context) ([]repository.ListAllPostsRow, error)
 	GetPostById(ctx context.Context, postID pgtype.UUID) (*repository.Post, error)
   UpdatePost(ctx context.Context, args *repository.UpdatePostParams) (*repository.Post, error)
   DeletePostById(ctx context.Context, postID pgtype.UUID) (string, error)
@@ -33,18 +34,14 @@ func (pr *postServiceSqlc) CreatePost(ctx context.Context, args *repository.Crea
     if err != nil {
       return nil, err
     }
-    return post, nil
+    return &post, nil
 }
 
-func (pr *postServiceSqlc) GetAllPosts(ctx context.Context) ([]*repository.ListAllPostsRow, error) {
+func (pr *postServiceSqlc) GetAllPosts(ctx context.Context) ([]repository.ListAllPostsRow, error) {
 	// Get the user by ID from the schema
 	posts, err := pr.postRepository.ListAllPosts(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	if len(posts) == 0 {
-		posts = []*repository.ListAllPostsRow{}
 	}
 
 	return posts, nil
@@ -57,17 +54,22 @@ func (u *postServiceSqlc) GetPostById(ctx context.Context, postID pgtype.UUID) (
 		return nil, err
 	}
 
-	return post, nil
+	return &post, nil
 }
 
 func (u *postServiceSqlc) UpdatePost(ctx context.Context, args *repository.UpdatePostParams) (*repository.Post, error) {
-  // Update the post by ID from the schema
+  args.UpdatedAt = pgtype.Timestamptz{
+		Time: time.Now(),
+		Valid: true,
+	}
+	
+	// Update the post by ID from the schema
   post, err := u.postRepository.UpdatePost(ctx, args)
   if err != nil {
     return nil, err
   }
 
-  return post, nil
+  return &post, nil
 }
 
 func (u *postServiceSqlc) DeletePostById(ctx context.Context, postID pgtype.UUID) (string, error) {
