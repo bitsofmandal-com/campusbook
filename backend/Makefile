@@ -75,9 +75,8 @@ sqlcgen:
 
 createmigration:
 	@echo "Creating migration..."
-	@timestamp=$$(date +%s); \
-	random=$$(openssl rand -hex 3); \
-	read -p "Enter migration name: " name; \
-	migrate create -ext sql -dir migrations -seq "$${timestamp}_$${random}_$${name}"
+	@atlas schema apply --url "postgres://campusbook:campusbook@localhost:5433/campusbook?sslmode=disable&search_path=public" \
+    --to "file://pkg/schema/schema.sql" --dev-url "docker://postgres/15/dev?search_path=public"
+
 
 .PHONY: all build run clean watch docker-run docker-down migrate createmigration

@@ -11,20 +11,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
 
+	"ariga.io/atlas-go-sdk/atlasexec"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	_ "github.com/joho/godotenv/autoload"
 
 	"campusbook-be/internal/repository"
-
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -126,16 +123,44 @@ func migrateDatabase(username, password, host, databaseName, schema string, dbpo
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable&search_path=%s",
 		username, password, host, dbport, databaseName, schema)
 
-	// Create a new migrate instance
-	m, err := migrate.New("file://migrations", connStr)
+	// Define the execution context, supplying a migration directory
+	// and potentially an `atlas.hcl` configuration file using `atlasexec.WithHCL`.
+	workdir, err := atlasexec.NewWorkingDir(
+		atlasexec.WithMigrations(
+			os.DirFS("./pkg/schema"),
+		),
+	)
 	if err != nil {
-		log.Fatalf("failed to create migrate instance: %v", err)
+		log.Fatalf("failed to load working directory: %v", err)
 	}
+	// atlasexec works on a temporary directory, so we need to close it
+	defer workdir.Close()
 
-	// Apply migrations
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	log.Printf("Running migrations on %s\n", workdir.Path())
+
+	// Initialize the client.
+	client, err := atlasexec.NewClient(workdir.Path(), "atlas")
+	if err != nil {
+		log.Fatalf("failed to initialize client: %v", err)
+	}
+	absSchemaFile, err := filepath.Abs("./pkg/schema")
+	if err != nil {
+		log.Fatalf("failed to hash migrations: %v", err)
+	}
+		// Run `atlas schema apply` on a Postgres database under /tmp.
+	res, err := client.SchemaApply(context.Background(), &atlasexec.SchemaApplyParams{
+		URL: connStr,
+		To:  "file://" + absSchemaFile,
+		DevURL: "docker://postgres/15/dev?search_path=public",
+		AutoApprove: true,
+	})
+	if err != nil {
 		log.Fatalf("failed to apply migrations: %v", err)
 	}
-
-	log.Println("Migrations applied successfully.")
+	if res.Applied != nil {
+		log.Printf("Applied %d migrations\n", len(res.Applied.Applied))
+		return
+	}else {
+		log.Printf("No migrations to apply\n")
+	}
 }
