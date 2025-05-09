@@ -1,0 +1,68 @@
+dsn: postgres://campusbook:campusbook@db/kratos?sslmode=disable
+
+session:
+  cookie:
+    same_site: Lax
+    name: ory_sso_session
+    path: /
+
+secrets:
+  cookie:
+    - gdQVcvi2sSjDrr+NnvDv+C9FGyES3g==
+  cipher:
+    - vI4EDtjxHWp7njMvRM21O5mqYfZCdg==
+
+log:
+  level: debug
+  leak_sensitive_values: true
+
+selfservice:
+  default_browser_return_url: http://127.0.0.1:4455/dashboard # Replace with your app's URL
+  allowed_return_urls:
+    - http://127.0.0.1:4455
+
+  methods:
+    password:
+      enabled: true
+
+  flows:
+    error:
+      ui_url: http://127.0.0.1:4455/error # Replace with your error page URL
+
+    settings:
+      ui_url: http://127.0.0.1:4455/settings # Replace with your settings page URL
+      privileged_session_max_age: 15m
+    
+    recovery:
+      enabled: true
+      ui_url: http://127.0.0.1:4455/recovery # Replace with your recovery page URL
+    
+    verification:
+      enabled: true
+      ui_url: http://127.0.0.1:4455/verification # Replace with your verification page URL
+      after:
+        default_browser_return_url: http://127.0.0.1:4455/
+
+    registration:
+      ui_url: http://127.0.0.1:4455/registration # Replace with your registration page URL
+      after:
+        password:
+          hooks:
+            - hook: session
+    login:
+      ui_url: http://127.0.0.1:4455/login # Replace with your login page URL
+      lifespan: 10m
+
+identity:
+  default_schema_id: default
+  schemas:
+    - id: default
+      url: file:///etc/config/schemas/identity.schema.json
+
+hashers:
+  argon2:
+    parallelism: 1
+    memory: 128MB
+    iterations: 3
+    salt_length: 16
+    key_length: 32

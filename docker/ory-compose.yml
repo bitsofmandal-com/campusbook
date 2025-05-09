@@ -1,0 +1,118 @@
+services:
+  kratos:
+    image: oryd/kratos:latest
+    container_name: kratos
+    ports:
+      - "4433:4433" # Admin API
+      - "4434:4434" # Public API
+    environment:
+      - DATABASE_URL=postgresql://campusbook:campusbook@db:5432/kratos?sslmode=disable
+      - DSN=postgres://campusbook:campusbook@db/kratos?sslmode=disable
+      - SERVE_PUBLIC_PORT=4434
+      - SERVE_ADMIN_PORT=4433
+      - SELFSERVICE_PORT=4433
+      - KRATOS_URL=http://kratos:4433
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ory-network
+    volumes:
+      - ./kratos:/etc/config/kratos
+      - ./kratos/schemas:/etc/config/schemas # Mount the schemas directory
+    command: serve --dev -c /etc/config/kratos/kratos.yml
+
+  # kratos-migration:
+  #   image: oryd/kratos:v1.3.1
+  #   depends_on:
+  #     - db
+  #   command: migrate sql postgres://campusbook:campusbook@db:5432/kratos?sslmode=disable -c /etc/config/kratos/kratos.yml -y
+  #   volumes:
+  #     - ./kratos:/etc/config/kratos
+  #     - ./kratos/schemas:/etc/config/schemas
+  #   networks:
+  #     - ory-network
+
+  # hydra:
+  #   image: oryd/hydra:latest
+  #   container_name: hydra
+  #   ports:
+  #     - "4444:4444" # Public API
+  #     - "4445:4445" # Admin API
+  #   environment:
+  #     - DSN=postgres://campusbook:campusbook@db/hydra?sslmode=disable
+  #     - SERVE_PUBLIC_PORT=4444
+  #     - SERVE_ADMIN_PORT=4445
+  #   depends_on:
+  #     - db
+  #     - hydra-migration
+  #   networks:
+  #     - ory-network
+  #   command:
+  #     serve all --dev -c /etc/config/hydra/hydra.yml
+  #   volumes:
+  #     - ./hydra:/etc/config/hydra
+
+  # hydra-migration:
+  #   image: oryd/hydra:latest
+  #   depends_on:
+  #     - db
+  #   command: migrate sql postgres://campusbook:campusbook@db:5432/hydra?sslmode=disable -c /etc/config/hydra/hydra.yml -y
+  #   volumes:
+  #     - ./hydra:/etc/config/hydra
+  #   networks:
+  #     - ory-network
+
+  # oathkeeper:
+  #   image: oryd/oathkeeper:latest
+  #   container_name: ory-oathkeeper
+  #   ports:
+  #     - "4455:4455" # Public API
+  #   environment:
+  #     - CONFIG_PATH=/etc/config/oathkeeper.yaml
+  #   depends_on:
+  #     - kratos
+  #     - hydra
+  #   networks:
+  #     - ory-network
+  #   volumes:
+  #     - ./oathkeeper:/etc/config/oathkeeper
+
+  # keto:
+  #   image: oryd/keto:latest
+  #   container_name: ory-keto
+  #   ports:
+  #     - "4466:4466" # Public API
+  #   environment:
+  #     - DSN=postgres://campusbook:campusbook@db/keto?sslmode=disable
+  #     - LOG_LEVEL=debug
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - ory-network
+
+  db:
+    image: postgres:latest
+    container_name: db
+    environment:
+      POSTGRES_USER: campusbook
+      POSTGRES_PASSWORD: campusbook
+      POSTGRES_DB: kratos
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg-ory-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campusbook"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ory-network
+
+networks:
+  ory-network:
+    driver: bridge
+  
+volumes:
+  pg-ory-data:
