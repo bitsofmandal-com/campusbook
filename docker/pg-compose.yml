@@ -1,23 +1,21 @@
-version: '3.9'
-
 services:
   db:
     image: postgres:16
-    container_name: aitplacement-db
+    container_name: campusbook
     restart: unless-stopped
     environment:
-      POSTGRES_DB: aitplacement
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: campusbook
+      POSTGRES_USER: campusbook
+      POSTGRES_PASSWORD: campusbook
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U username"]
+      test: ["CMD-SHELL", "pg_isready -U campusbook"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  pgdata:
+  pg-data:

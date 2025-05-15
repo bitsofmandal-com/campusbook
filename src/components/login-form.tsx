@@ -1,4 +1,3 @@
-import { signIn } from "@/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { WORKSPACE_PAGE } from "@/routes";
 
 export function LoginForm({
   className,
@@ -24,12 +23,16 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-6">
+          {/* <div className="grid gap-6">
             <form
               action={async () => {
                 "use server";
-                await signIn("microsoft", {
-                  redirectTo: WORKSPACE_PAGE,
+                await signIn.social({
+                  provider: "google",
+                  callbackURL: "/workspace",
+                  errorCallbackURL: "/error",
+                  newUserCallbackURL: "/welcome",
+                  disableRedirect: true,
                 });
               }}
             >
@@ -45,12 +48,16 @@ export function LoginForm({
                 </Button>
               </div>
             </form>
-          </div>
+          </div> */}
           <form
             action={async () => {
               "use server";
-              await signIn("google", {
-                redirectTo: WORKSPACE_PAGE,
+              await signIn.social({
+                provider: "google",
+                callbackURL: "/workspace",
+                errorCallbackURL: "/error",
+                newUserCallbackURL: "/welcome",
+                disableRedirect: true,
               });
             }}
           >

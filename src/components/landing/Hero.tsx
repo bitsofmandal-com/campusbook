@@ -1,6 +1,6 @@
-import { signIn } from "@/auth";
 import { HeroCards } from "@/components/landing/HeroCards";
 import { Button } from "@/components/ui/button";
+import { signIn } from "@/lib/auth-client";
 
 export const Hero = () => {
   return (
@@ -17,7 +17,13 @@ export const Hero = () => {
           <form
             action={async () => {
               "use server";
-              await signIn();
+              await signIn.social({
+                provider: "google",
+                callbackURL: "/workspace",
+                errorCallbackURL: "/error",
+                newUserCallbackURL: "/welcome",
+                disableRedirect: true,
+              });
             }}
             className="space-x-2"
           >
